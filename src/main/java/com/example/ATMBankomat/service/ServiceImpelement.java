@@ -1,48 +1,69 @@
 package com.example.ATMBankomat.service;
 
+import com.example.ATMBankomat.exceptionHandlng.CardTypeNotMatch;
+import com.example.ATMBankomat.exceptionHandlng.NotEnoughMoney;
 import com.example.ATMBankomat.model.Card;
 import com.example.ATMBankomat.model.enume.CardType;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static com.example.ATMBankomat.model.WorkerClass.cards;
 
 public class ServiceImpelement implements ServiceCard{
 
-    static CardType cardType1 = CardType.UZCARD;
-    static CardType cardType2 = CardType.HUMO;
-    static CardType cardType3 = CardType.VISA;
-    static CardType cardType4 = CardType.UNIONPAY;
 
-    static CardType[] cardTypes = {cardType1, cardType2, cardType3, cardType4};
+    ArrayList<Card> arrayList = new ArrayList<>();
+
     @Override
-    public void moneyTransfer(Card card) {
+    public void moneyTransfer(Card deleviry) throws CardTypeNotMatch {
 
         Scanner scanner = new Scanner(System.in);
         String blok = "", kart="";
         System.out.println("O'tkazmoqchi bo'lgan karta ID ni yozing : ");
         String id = scanner.nextLine();
+
         for (int i = 0; i < cards.length; i++) {
-            if(cards[i].getId().equals(id)){
-                if(cards[i].isCondition()){
-                    System.out.println("Qancha o'tkazmoqchisiz : ");
-                    double moneyInsert = scanner.nextDouble();
-                    double summa = cards[i].getBalance();
-                    summa += moneyInsert;
-                    cards[i].setBalance(summa);
-                    System.out.println(summa);
-                    card.setBalance(card.getBalance()-moneyInsert);  //****
-                    blok = ""; kart="";
-                    return;
-                }else {
-                    blok = "Siz pul o'tkazmoqchi bo'lgan karta bloklangan.";
-                   kart="";
+
+                if (cards[i].getId().equals(id)) {
+                    Card recevr = cards[i];
+                    if (cards[i].isCondition()) {
+                        if (deleviry.getCardType().getCurrency().equals(recevr.getCardType().getCurrency())) {
+                            System.out.println("Qancha o'tkazmoqchisiz : ");
+                            double recevrSum = scanner.nextDouble();
+                            double summa = recevr.getBalance();
+                            if((deleviry.getBalance() - (recevrSum * 0.01)) >= recevrSum) {
+                                summa += recevrSum;
+                                recevr.setBalance(summa);
+                                System.out.println("Muvoffaqiyatli.");
+                                deleviry.setBalance(deleviry.getBalance() - recevrSum - recevrSum * 0.01);  //****
+                            }else {
+                                try{
+                                 throw new NotEnoughMoney(deleviry.getBalance());
+                                }catch (NotEnoughMoney notEnoughMoney){
+                                    System.out.println("Exception : " + notEnoughMoney);
+                                }
+                            }
+                            blok = "";
+                            kart = "";
+                            arrayList.add(deleviry);
+                            arrayList.add(recevr);
+                            return;
+                        }else {
+                            System.out.println("Exception : ");
+                           throw new CardTypeNotMatch(deleviry.getCardType(), recevr.getCardType());
+                        }
+
+                    } else {
+                        blok = "Siz pul o'tkazmoqchi bo'lgan karta bloklangan.";
+                        kart = "";
+                    }
+                } else {
+                    kart = "Unday ID li karta mavjud emas.";
+                    blok = "";
                 }
-            }else {
-                kart = "Unday ID li karta mavjud emas.";
-                blok ="";
             }
-        }
+
         System.out.println(blok + " " + kart);
 
     }
@@ -74,5 +95,10 @@ public class ServiceImpelement implements ServiceCard{
     @Override
     public void cardBalance(Card card) {
         System.out.println(card.getBalance());
+    }
+
+    @Override
+    public void viewHistory() {
+        System.out.println(arrayList);
     }
 }

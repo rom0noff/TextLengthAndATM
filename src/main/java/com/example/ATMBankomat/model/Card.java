@@ -1,21 +1,36 @@
 package com.example.ATMBankomat.model;
 
+import com.example.ATMBankomat.model.enume.CardType;
+
 public class Card {
     private String id;
     private int pin;
     private String owner;
     private double balance;
     private boolean condition;
-    private String type;
+
+    private CardType cardType;
 
 
 
-    public Card(String id, String owner, double balance, int pin, boolean condition) {
+    public Card(String id, String owner, double balance, int pin, boolean condition, CardType cardType) {
         this.id = id;
         this.owner = owner;
         this.balance = balance;
         this.pin = pin;
         this.condition = condition;
+        this.cardType = cardType;
+    }
+    public Card(){
+
+    }
+
+    public CardType getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(CardType cardType) {
+        this.cardType = cardType;
     }
 
     public boolean isCondition() {
@@ -57,11 +72,14 @@ public class Card {
     public void setBalance(double balance) {
         this.balance = balance;
     }
-    public String getType() {
-        return type;
-    }
 
-    public void setType(String type) {
-        this.type = type;
+    @Override
+    public String toString() {
+        return "Card{" +
+                "id='" + id + '\'' +
+                ", owner='" + owner + '\'' +
+                ", balance=" + balance +
+                ", cardType=" + cardType +
+                '}';
     }
 }
